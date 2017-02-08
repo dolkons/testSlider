@@ -7,15 +7,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import java.io.*;
-
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * Created by dolkons on 06.02.17.
  */
-public class FirstTest {
+public class SliderTest {
 
     private ChromeDriver chromeDriver;
     private String currentSpeed;
@@ -24,7 +22,7 @@ public class FirstTest {
     private WebElement increaseButton;
 
     @BeforeClass
-    public void setup() throws IOException {
+    public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
     }

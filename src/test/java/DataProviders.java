@@ -3,6 +3,7 @@ import org.testng.annotations.DataProvider;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 /**
  * Created by dolkons on 08.02.17.
@@ -65,5 +66,39 @@ public class DataProviders {
                 {"15.0","1350", "Мбит/сек (макс.)"},
                 {"Макс","1400", "Мбит/сек (макс.)"},
         };
+    }
+
+    @DataProvider(name = "paymentData")
+    public static Iterator<Object[]> paymentData(Method m){
+        ArrayList<Object[]> objects = new ArrayList<>();
+
+        switch (m.getName()){
+            case "PaymentTestRandomString":{
+                Random random = new Random();
+                for (int i=0; i <= random.nextInt(10); i++){
+                    objects.add(new Object[]{Utils.createRandomString(random.nextInt(20))});
+                }
+                break;
+            }
+            case "PaymentTestNegativeValue":{
+                Random random = new Random();
+                for (int i=0; i <= random.nextInt(10); i++){
+                    objects.add(new Object[]{
+                            (String.valueOf(0-Math.abs(random.nextInt())))
+                    });
+                }
+                break;
+            }
+            case "PaymentTestCorrectValue":{
+                Random random = new Random();
+                for (int i=0; i <= random.nextInt(10); i++){
+                    objects.add(new Object[]{
+                            (String.valueOf(Math.abs(random.nextInt())))
+                    });
+                }
+                break;
+            }
+        }
+        return objects.iterator();
     }
 }
