@@ -1,6 +1,10 @@
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.asserts.Assertion;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,11 +20,12 @@ import java.util.concurrent.TimeUnit;
 public class Utils {
 
     private static Process p;
+    private static final String SLIDER_SERVICE_DIR = System.getProperty("user.home") + "/test_slider";
 
     public static void runTestSliderService() throws IOException, InterruptedException {
         System.out.println("Starting Test Slider service...");
         ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", "java -jar test-slider-1.0.0-SNAPSHOT.jar &");
-        builder.directory(new File(System.getProperty( "user.home" ) + "/test_slider"));
+        builder.directory(new File(SLIDER_SERVICE_DIR));
         builder.redirectErrorStream(true);
         p = builder.start();
         BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -31,6 +36,13 @@ public class Utils {
                 break;
             }
             System.out.println(line);
+        }
+    }
+
+    public static void deleteDatabase() throws IOException {
+        File databaseFolder = new File(SLIDER_SERVICE_DIR + "/sliderDB");
+        if (databaseFolder.exists() || databaseFolder.isDirectory()){
+            FileUtils.deleteDirectory(databaseFolder);
         }
     }
 
@@ -56,8 +68,14 @@ public class Utils {
 
     public static ChromeDriver initializeChromeDriver() {
         ChromeDriver chromeDriver = new ChromeDriver();
-        chromeDriver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
-        chromeDriver.get("http://localhost:4567");
+        chromeDriver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+        try {
+            chromeDriver.get("http://localhost:4567");
+        }
+        catch (TimeoutException e){
+            chromeDriver.quit();
+            new Assertion().fail("page load timeout!");
+        }
         return chromeDriver;
     }
 

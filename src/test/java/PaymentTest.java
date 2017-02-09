@@ -84,8 +84,11 @@ public class PaymentTest {
 
     @AfterClass(enabled = true, alwaysRun = true)
     public void finish() throws IOException, InterruptedException {
-        chromeDriver.close();
+        if (chromeDriver != null) {
+            chromeDriver.quit();
+        }
         Utils.stopTestSliderService();
+        Utils.deleteDatabase();
     }
 
 }

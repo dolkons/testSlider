@@ -84,7 +84,11 @@ public class SliderTest {
     }
 
     @AfterClass(enabled = true)
-    public void finish(){
-        chromeDriver.close();
+    public void finish() throws IOException, InterruptedException {
+        if (chromeDriver != null) {
+            chromeDriver.quit();
+        }
+        Utils.stopTestSliderService();
+        Utils.deleteDatabase();
     }
 }
