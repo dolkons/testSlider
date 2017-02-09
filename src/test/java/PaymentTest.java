@@ -40,8 +40,14 @@ public class PaymentTest {
         System.out.println("Starting PaymentTestRandomString...");
         paymentAmount.sendKeys(payment);
         doPaymentButton.click();
-        assertEquals("Payment amount edit field is not equal to zero!", paymentAmount.getAttribute("value"), "0");
-        assertEquals("Balance is not equal to zero!", balance.getText(), "0\nруб.");
+        try{
+            WebDriverWait wait = new WebDriverWait(chromeDriver, 1);
+            wait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
+            assertEquals("Balance is not equal to zero!", balance.getText(), "0\nруб.");
+        }
+        catch (TimeoutException e){
+            assertEquals("Payment amount edit field is not equal to zero!", paymentAmount.getAttribute("value"), "0");
+        }
         Thread.sleep(100);
     }
 

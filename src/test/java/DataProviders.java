@@ -89,11 +89,11 @@ public class DataProviders {
                 }
                 break;
             }
-            case "PaymentTestCorrectValue":{
+            default:{
                 Random random = new Random();
                 for (int i=0; i <= random.nextInt(10); i++){
                     objects.add(new Object[]{
-                            (String.valueOf(Math.abs(random.nextInt())))
+                            (String.valueOf(Math.abs(random.nextInt(10000))))
                     });
                 }
                 break;
