@@ -1,15 +1,19 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestResult;
 import org.testng.annotations.*;
 import org.testng.asserts.Assertion;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Iterator;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -19,10 +23,7 @@ import static org.testng.AssertJUnit.assertEquals;
 public class PaymentTest {
 
     private ChromeDriver chromeDriver;
-    private WebElement paymentAmount;
-    private WebElement doPaymentButton;
-    private WebElement balance;
-    private WebElement doResetButton;
+    private MainPage mainPage;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
@@ -30,26 +31,17 @@ public class PaymentTest {
         chromeDriver = Utils.initializeChromeDriver();
     }
 
-    @BeforeMethod
-    public void initializePageElements(){
-        paymentAmount = chromeDriver.findElement(By.id("amount"));
-        doPaymentButton = chromeDriver.findElement(By.className("actions")).findElements(By.xpath("./*")).get(0);
-        balance = chromeDriver.findElement(By.id("balance-holder"));
-        paymentAmount.clear();
-    }
-
     @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestRandomString(String payment) throws InterruptedException {
         System.out.println("Starting PaymentTestRandomString...");
-        paymentAmount.sendKeys(payment);
-        doPaymentButton.click();
+        mainPage.doPayment(payment);
         try{
             WebDriverWait wait = new WebDriverWait(chromeDriver, 1);
-            wait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
-            assertEquals("Balance is not equal to zero!", balance.getText(), "0\nруб.");
+            wait.until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
+            assertEquals("Balance is not equal to zero!", mainPage.getBalance().getText(), "0\nруб.");
         }
         catch (TimeoutException e){
-            assertEquals("Payment amount edit field is not equal to zero!", paymentAmount.getAttribute("value"), "0");
+            assertEquals("Payment amount edit field is not equal to zero!", mainPage.getPaymentAmount().getAttribute("value"), "0");
         }
         Thread.sleep(100);
     }
@@ -57,15 +49,14 @@ public class PaymentTest {
     @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestNegativeValue(String payment) throws InterruptedException {
         System.out.println("Starting PaymentTestNegativeValue...");
-        paymentAmount.sendKeys(payment);
-        doPaymentButton.click();
+        mainPage.doPayment(payment);
         try{
             WebDriverWait wait = new WebDriverWait(chromeDriver, 1);
-            wait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
-            assertEquals("Balance has a negative value!", balance.getText(), "0\nруб.");
+            wait.until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
+            assertEquals("Balance has a negative value!", mainPage.getBalance().getText(), "0\nруб.");
         }
         catch (TimeoutException e) {
-            assertEquals("Payment amount edit field is not equal to zero!", paymentAmount.getAttribute("value"), "0");
+            assertEquals("Payment amount edit field is not equal to zero!", mainPage.getPaymentAmount().getAttribute("value"), "0");
         }
         Thread.sleep(100);
     }
@@ -73,18 +64,14 @@ public class PaymentTest {
     @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestCorrectValue(final String payment) throws InterruptedException {
         System.out.println("Starting PaymentTestCorrectValue...");
-        paymentAmount.sendKeys(payment);
-        doPaymentButton.click();
-//        WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
-//        balanceAppearWait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
-//        assertEquals("Balance field value is invalid!", balance.getText(), payment+"\nруб.");
+        mainPage.doPayment(payment);
 
         WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
         try {
             balanceAppearWait.until(new ExpectedCondition<Boolean>() {
                 @Override
                 public Boolean apply(WebDriver webDriver) {
-                    if (balance.getText().equals(payment)) {
+                    if (mainPage.getBalance().getText().equals(payment)) {
                         return true;
                     } else {
                         return false;
@@ -95,21 +82,28 @@ public class PaymentTest {
         catch (TimeoutException e){
             new Assertion().fail(
                     "Payment amount didn't appear in balance field!\nExpected payment amount: " +
-                            payment+"\n" + "Actual payment amount: " + balance.getText());
+                            payment+"\n" + "Actual payment amount: " + mainPage.getBalance().getText());
             e.printStackTrace();
         }
-
-
         Thread.sleep(100);
     }
 
     @AfterMethod
-    public void reset(){
-        doResetButton = chromeDriver.findElement(By.className("actions")).findElements(By.xpath("./*")).get(1);
-        doResetButton.click();
-        if (!balance.getText().equals("0\nруб.")){
+    public void reset(ITestResult testResult) throws IOException {
+        if (testResult.getStatus() == ITestResult.FAILURE){
+
+            DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss_dd.MM.yyyy");
+            Calendar cal = Calendar.getInstance();
+
+            File scrFile = chromeDriver.getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(scrFile, new File(System.getProperty("user.home")+
+                    "/test_slider/screenshots/"+testResult.getName() +
+                    "_" + dateFormat.format(cal.getTime())));
+        }
+        mainPage.clickOnResetButton();
+        if (!mainPage.getBalance().getText().equals("0\nруб.")){
             new WebDriverWait(chromeDriver, 5).
-                    until(ExpectedConditions.textToBePresentInElement(balance,"0\nруб."));
+                    until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(),"0\nруб."));
         }
     }
 

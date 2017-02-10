@@ -1,7 +1,10 @@
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.asserts.Assertion;
 
 /**
  * Created by dolkons on 10.02.17.
@@ -10,67 +13,94 @@ public class MainPage {
 
     private WebDriver driver;
 
+    @FindBy(id = "amount")
     private WebElement paymentAmount;
+
+    @FindBy(xpath = "//*[@class='actions']/*[1]")
     private WebElement doPaymentButton;
+
+    @FindBy(id = "balance-holder")
     private WebElement balance;
+
+    @FindBy(xpath = "//*[@class='increase']/*")
     private WebElement increaseButton;
+
+    @FindBy(xpath = "//*[@class='decrease']/*")
+    private WebElement decreaseButton;
+
+    @FindBy(id = "slider-handle")
     private WebElement slider;
+
+    @FindBy(xpath = "//*[@class='actions']/*[2]")
     private WebElement doResetButton;
-    private WebElement newCost;
+
+    @FindBy(xpath = "//*[@class='tarriff-info']/a")
     private WebElement doPurchaseButton;
+
+    @FindBy(xpath = "//*[@class='tarriff-info']/div[3]")
     private WebElement currentCost;
+
+    @FindBy(xpath = "//*[@class='cost']")
+    private WebElement newCost;
+
+    @FindBy(xpath = "//*[@class='tariff unavailable']/*/*[@class='speed']")
     private WebElement currentSpeed;
+
+    @FindBy(xpath = "//*[@class='tariff']/*/*[@class='speed']")
+    private WebElement newSpeed;
+
+    @FindBy(xpath = "//*[@class='tariff unavailable']/*/*[@class='time']")
+    private WebElement currentTime;
+
+    @FindBy(xpath = "//*[@class='tariff']/*/*[@class='time']")
+    private WebElement newTime;
+
+    private Point maxLeftSliderLocation;
 
     public MainPage(WebDriver driver) {
         this.driver = driver;
+        PageFactory.initElements(driver, this);
+        maxLeftSliderLocation = getSlider().getLocation();
+    }
+
+    public Point getMaxLeftSliderLocation() {
+        return maxLeftSliderLocation;
+    }
+
+    public WebElement getNewSpeed() {
+        return newSpeed;
+    }
+
+    public WebElement getCurrentTime() {
+        return currentTime;
+    }
+
+    public WebElement getNewTime() {
+        return newTime;
     }
 
     public WebElement getPaymentAmount() {
         return paymentAmount;
     }
 
-    public void setPaymentAmount(WebElement paymentAmount) {
-        this.paymentAmount = paymentAmount;
-    }
-
     public WebElement getDoPaymentButton() {
         return doPaymentButton;
-    }
-
-    public void setDoPaymentButton(WebElement doPaymentButton) {
-        this.doPaymentButton = doPaymentButton;
     }
 
     public WebElement getBalance() {
         return balance;
     }
 
-    public void setBalance(WebElement balance) {
-        this.balance = balance;
-    }
-
     public WebElement getIncreaseButton() {
         return increaseButton;
-    }
-
-    public void setIncreaseButton(WebElement increaseButton) {
-        this.increaseButton = increaseButton;
     }
 
     public WebElement getSlider() {
         return slider;
     }
 
-    public void setSlider(WebElement slider) {
-        this.slider = slider;
-    }
-
     public WebElement getDoResetButton() {
         return doResetButton;
-    }
-
-    public void setDoResetButton(WebElement doResetButton) {
-        this.doResetButton = doResetButton;
     }
 
     public WebElement getNewCost() {
@@ -112,5 +142,34 @@ public class MainPage {
             JavascriptExecutor jse = (JavascriptExecutor) driver;
             jse.executeScript("document.getElementsByClassName('increase')[0].children[0].click()");
         }
+    }
+
+    public void clickOnDecreaseButton(){
+        try {
+            decreaseButton.click();
+        } catch (WebDriverException e) {
+            JavascriptExecutor jse = (JavascriptExecutor) driver;
+            jse.executeScript("document.getElementsByClassName('decrease')[0].children[0].click()");
+        }
+    }
+
+    public void doPayment(String payment){
+        paymentAmount.clear();
+        paymentAmount.sendKeys(payment);
+
+        String currentBalance = this.getBalance().getText().split("\n")[0];
+        doPaymentButton.click();
+        WebDriverWait paymentWait = new WebDriverWait(driver, 5);
+        paymentWait.until(
+                ExpectedConditions.textToBePresentInElement(
+                        this.balance, String.valueOf(Integer.parseInt(payment) + Integer.parseInt(currentBalance))+"\nруб."));
+    }
+
+    public void clickOnResetButton(){
+        doResetButton.click();
+    }
+
+    public void clickOnPurchaseButton(){
+        doPurchaseButton.click();
     }
 }

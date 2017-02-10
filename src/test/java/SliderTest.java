@@ -1,13 +1,14 @@
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
+
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -16,74 +17,48 @@ import static org.testng.AssertJUnit.assertEquals;
 public class SliderTest {
 
     private ChromeDriver chromeDriver;
-    private String currentSpeed;
-    private String currentCost;
-    private String currentSpeedUnits;
-    private WebElement increaseButton;
-    private WebElement decreaseButton;
+    private MainPage mainPage;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
-    }
-
-    @BeforeMethod
-    public void initializePageElements(){
-        currentSpeed = chromeDriver.findElement(
-                By.className("main-offer-container")).
-                findElement(By.className("speed")).
-                findElement(By.tagName("strong")).
-                getText();
-        currentCost = chromeDriver.findElement(
-                By.className("main-offer-container")).
-                findElement(By.className("cost")).
-                findElement(By.tagName("strong")).
-                getText();
-        currentSpeedUnits = chromeDriver.findElement(
-                By.className("main-offer-container")).
-                findElement(By.className("speed")).
-                findElement(By.tagName("span")).
-                getText();
-        increaseButton = chromeDriver.
-                findElement(By.className("increase")).
-                findElement(By.className("icon"));
-        decreaseButton = chromeDriver.
-                findElement(By.className("decrease")).
-                findElement(By.className("icon"));
+        mainPage = new MainPage(chromeDriver);
     }
 
     @Test(enabled = true, dataProvider = "tariffsData", dataProviderClass = DataProviders.class)
     public void TestIncrease(String speed, String cost, String speedUnits) throws InterruptedException {
         System.out.println("Starting TestIncrease");
 
-        assertEquals("elements are not equals!", currentSpeed, speed);
-        assertEquals("elements are not equals!", currentCost, cost);
-        assertEquals("elements are not equals", currentSpeedUnits, speedUnits);
+        assertEquals("elements are not equals!", mainPage.getCurrentSpeed().getText(), speed);
+        assertEquals("elements are not equals!", mainPage.getCurrentCost().getText(), cost);
+        assertEquals("elements are not equals", mainPage.getCurrentSpeed().getText().split("\n")[1], speedUnits);
 
-        try{
-            increaseButton.click();
-        }
-        catch (WebDriverException e) {
-            JavascriptExecutor jse = (JavascriptExecutor) chromeDriver;
-            jse.executeScript("document.getElementsByClassName('increase')[0].children[0].click()");
-        }
+        mainPage.clickOnIncreaseButton();
     }
 
     @Test(enabled = true, dataProvider = "tariffsData", dataProviderClass = DataProviders.class, dependsOnMethods = "TestIncrease")
     public void TestDecrease(String speed, String cost, String speedUnits) throws InterruptedException {
         System.out.println("Starting TestDecrease");
 
-        assertEquals("elements are not equals!", currentSpeed, speed);
-        assertEquals("elements are not equals!", currentCost, cost);
-        assertEquals("elements are not equals", currentSpeedUnits, speedUnits);
+        assertEquals("elements are not equals!", mainPage.getCurrentSpeed().getText(), speed);
+        assertEquals("elements are not equals!", mainPage.getCurrentCost().getText(), cost);
+        assertEquals("elements are not equals", mainPage.getCurrentSpeed().getText().split("\n")[1], speedUnits);
 
-        try{
-            decreaseButton.click();
-        }
-        catch (WebDriverException e) {
-            JavascriptExecutor jse = (JavascriptExecutor) chromeDriver;
-            jse.executeScript("document.getElementsByClassName('decrease')[0].children[0].click()");
+        mainPage.clickOnDecreaseButton();
+    }
+
+    @AfterMethod
+    public void finish_test(ITestResult testResult) throws IOException {
+        if (testResult.getStatus() == ITestResult.FAILURE){
+
+            DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss_dd.MM.yyyy");
+            Calendar cal = Calendar.getInstance();
+
+            File scrFile = chromeDriver.getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(scrFile, new File(System.getProperty("user.home")+
+                    "/test_slider/screenshots/"+testResult.getName() +
+                    "_" + dateFormat.format(cal.getTime())));
         }
     }
 
