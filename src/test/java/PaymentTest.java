@@ -1,10 +1,13 @@
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.*;
+import org.testng.asserts.Assertion;
 
 import java.io.IOException;
 
@@ -68,13 +71,35 @@ public class PaymentTest {
     }
 
     @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
-    public void PaymentTestCorrectValue(String payment) throws InterruptedException {
+    public void PaymentTestCorrectValue(final String payment) throws InterruptedException {
         System.out.println("Starting PaymentTestCorrectValue...");
         paymentAmount.sendKeys(payment);
         doPaymentButton.click();
+//        WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
+//        balanceAppearWait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
+//        assertEquals("Balance field value is invalid!", balance.getText(), payment+"\nруб.");
+
         WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
-        balanceAppearWait.until(ExpectedConditions.textToBePresentInElement(balance, payment));
-        assertEquals("Balance field value is invalid!", balance.getText(), payment+"\nруб.");
+        try {
+            balanceAppearWait.until(new ExpectedCondition<Boolean>() {
+                @Override
+                public Boolean apply(WebDriver webDriver) {
+                    if (balance.getText().equals(payment)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+        }
+        catch (TimeoutException e){
+            new Assertion().fail(
+                    "Payment amount didn't appear in balance field!\nExpected payment amount: " +
+                            payment+"\n" + "Actual payment amount: " + balance.getText());
+            e.printStackTrace();
+        }
+
+
         Thread.sleep(100);
     }
 

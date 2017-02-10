@@ -20,6 +20,7 @@ public class SliderTest {
     private String currentCost;
     private String currentSpeedUnits;
     private WebElement increaseButton;
+    private WebElement decreaseButton;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
@@ -46,6 +47,9 @@ public class SliderTest {
                 getText();
         increaseButton = chromeDriver.
                 findElement(By.className("increase")).
+                findElement(By.className("icon"));
+        decreaseButton = chromeDriver.
+                findElement(By.className("decrease")).
                 findElement(By.className("icon"));
     }
 
@@ -75,7 +79,7 @@ public class SliderTest {
         assertEquals("elements are not equals", currentSpeedUnits, speedUnits);
 
         try{
-            increaseButton.click();
+            decreaseButton.click();
         }
         catch (WebDriverException e) {
             JavascriptExecutor jse = (JavascriptExecutor) chromeDriver;

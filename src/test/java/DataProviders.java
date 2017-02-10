@@ -84,7 +84,25 @@ public class DataProviders {
                 Random random = new Random();
                 for (int i=0; i <= random.nextInt(10); i++){
                     objects.add(new Object[]{
-                            (String.valueOf(0-Math.abs(random.nextInt())))
+                            String.valueOf(0-Math.abs(random.nextInt()))
+                    });
+                }
+                break;
+            }
+            case "PurchaseButtonStateTest":{
+                Random random = new Random();
+                for (int i=0; i <= random.nextInt(10); i++){
+                    objects.add(new Object[]{
+                            String.valueOf(300 + random.nextInt(1100))
+                    });
+                }
+                break;
+            }
+            case "ServicePurchaseTest":{
+                Random random = new Random();
+                for (int i=0; i <= random.nextInt(10); i++){
+                    objects.add(new Object[]{
+                            String.valueOf(300 + random.nextInt(1100))
                     });
                 }
                 break;
@@ -101,4 +119,5 @@ public class DataProviders {
         }
         return objects.iterator();
     }
+
 }
