@@ -17,35 +17,33 @@ import static org.testng.AssertJUnit.assertEquals;
 public class SliderTest {
 
     private ChromeDriver chromeDriver;
-    private MainPage mainPage;
+    private MainPageObject mainPageObject;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
-        mainPage = new MainPage(chromeDriver);
+        mainPageObject = new MainPageObject(chromeDriver);
     }
 
-    @Test(enabled = true, dataProvider = "tariffsData", dataProviderClass = DataProviders.class)
-    public void TestIncrease(String speed, String cost, String speedUnits) throws InterruptedException {
-        System.out.println("Starting TestIncrease");
+    @Test(dataProvider = "tariffsData", dataProviderClass = DataProviders.class)
+    public void SliderTestIncrease(String speed, String cost, String speedUnits) throws InterruptedException {
 
-        assertEquals("elements are not equals!", mainPage.getCurrentSpeed().getText(), speed);
-        assertEquals("elements are not equals!", mainPage.getCurrentCost().getText(), cost);
-        assertEquals("elements are not equals", mainPage.getCurrentSpeed().getText().split("\n")[1], speedUnits);
+        assertEquals("elements are not equals!", mainPageObject.getNewSpeed().getText().split("\n")[0], speed);
+        assertEquals("elements are not equals!", mainPageObject.getNewCost().getText().split("\n")[0], cost);
+        assertEquals("elements are not equals", mainPageObject.getNewSpeed().getText().split("\n")[1], speedUnits);
 
-        mainPage.clickOnIncreaseButton();
+        mainPageObject.clickOnIncreaseButton();
     }
 
-    @Test(enabled = true, dataProvider = "tariffsData", dataProviderClass = DataProviders.class, dependsOnMethods = "TestIncrease")
-    public void TestDecrease(String speed, String cost, String speedUnits) throws InterruptedException {
-        System.out.println("Starting TestDecrease");
+    @Test(dataProvider = "tariffsData", dataProviderClass = DataProviders.class, dependsOnMethods = "SliderTestIncrease")
+    public void SliderTestDecrease(String speed, String cost, String speedUnits) throws InterruptedException {
 
-        assertEquals("elements are not equals!", mainPage.getCurrentSpeed().getText(), speed);
-        assertEquals("elements are not equals!", mainPage.getCurrentCost().getText(), cost);
-        assertEquals("elements are not equals", mainPage.getCurrentSpeed().getText().split("\n")[1], speedUnits);
+        assertEquals("elements are not equals!", mainPageObject.getNewSpeed().getText().split("\n")[0], speed);
+        assertEquals("elements are not equals!", mainPageObject.getNewCost().getText().split("\n")[0], cost);
+        assertEquals("elements are not equals", mainPageObject.getNewSpeed().getText().split("\n")[1], speedUnits);
 
-        mainPage.clickOnDecreaseButton();
+        mainPageObject.clickOnDecreaseButton();
     }
 
     @AfterMethod

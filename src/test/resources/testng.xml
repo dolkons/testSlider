@@ -1,0 +1,41 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Suite1">
+    <test name="Yota Slider Test" >
+        <classes>
+            <class name="MainWindowTest" >
+            </class>
+            <class name="SliderTest" >
+                <methods>
+                    <include name="TestIncrease"/>
+                    <include name="TestDecrease"/>
+                </methods>
+            </class>
+            <class name="PaymentTest" >
+                <methods>
+                    <include name="PaymentTestRandomString"/>
+                    <include name="PaymentTestNegativeValue"/>
+                    <include name="PaymentTestCorrectValue"/>
+                </methods>
+            </class>
+            <class name="ResetButtonTest" >
+                <methods>
+                    <include name="SliderResetTest"/>
+                    <include name="ResetConnectedServicesTest"/>
+                    <include name="ResetBalanceTest"/>
+                </methods>
+            </class>
+            <class name="ConnectionServicesTest" >
+                <methods>
+                    <include name="PurchaseButtonStateTest"/>
+                    <include name="ServicePurchaseTest"/>
+                </methods>
+            </class>
+            <class name="RestartServiceTest" >
+                <methods>
+                    <include name="refreshPageTest"/>
+                    <include name="restartServiceTest"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

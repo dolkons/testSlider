@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Iterator;
 
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -23,55 +22,52 @@ import static org.testng.AssertJUnit.assertEquals;
 public class PaymentTest {
 
     private ChromeDriver chromeDriver;
-    private MainPage mainPage;
+    private MainPageObject mainPageObject;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
+        mainPageObject = new MainPageObject(chromeDriver);
     }
 
-    @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
+    @Test(dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestRandomString(String payment) throws InterruptedException {
-        System.out.println("Starting PaymentTestRandomString...");
-        mainPage.doPayment(payment);
+        mainPageObject.doPayment(payment);
         try{
             WebDriverWait wait = new WebDriverWait(chromeDriver, 1);
-            wait.until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
-            assertEquals("Balance is not equal to zero!", mainPage.getBalance().getText(), "0\nруб.");
+            wait.until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(), payment));
+            assertEquals("Balance is not equal to zero!", mainPageObject.getBalance().getText(), "0\nруб.");
         }
         catch (TimeoutException e){
-            assertEquals("Payment amount edit field is not equal to zero!", mainPage.getPaymentAmount().getAttribute("value"), "0");
+            assertEquals("Payment amount edit field is not equal to zero!", mainPageObject.getPaymentAmount().getAttribute("value"), "0");
         }
-        Thread.sleep(100);
     }
 
-    @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
+    @Test(dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestNegativeValue(String payment) throws InterruptedException {
         System.out.println("Starting PaymentTestNegativeValue...");
-        mainPage.doPayment(payment);
+        mainPageObject.doPayment(payment);
         try{
             WebDriverWait wait = new WebDriverWait(chromeDriver, 1);
-            wait.until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
-            assertEquals("Balance has a negative value!", mainPage.getBalance().getText(), "0\nруб.");
+            wait.until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(), payment));
+            assertEquals("Balance has a negative value!", mainPageObject.getBalance().getText(), "0\nруб.");
         }
         catch (TimeoutException e) {
-            assertEquals("Payment amount edit field is not equal to zero!", mainPage.getPaymentAmount().getAttribute("value"), "0");
+            assertEquals("Payment amount edit field is not equal to zero!", mainPageObject.getPaymentAmount().getAttribute("value"), "0");
         }
-        Thread.sleep(100);
     }
 
-    @Test(enabled = true, dataProvider = "paymentData", dataProviderClass = DataProviders.class)
+    @Test(dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PaymentTestCorrectValue(final String payment) throws InterruptedException {
-        System.out.println("Starting PaymentTestCorrectValue...");
-        mainPage.doPayment(payment);
+        mainPageObject.doPayment(payment);
 
         WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
         try {
             balanceAppearWait.until(new ExpectedCondition<Boolean>() {
                 @Override
                 public Boolean apply(WebDriver webDriver) {
-                    if (mainPage.getBalance().getText().equals(payment)) {
+                    if (mainPageObject.getBalance().getText().split("\n")[0].equals(payment)) {
                         return true;
                     } else {
                         return false;
@@ -82,10 +78,10 @@ public class PaymentTest {
         catch (TimeoutException e){
             new Assertion().fail(
                     "Payment amount didn't appear in balance field!\nExpected payment amount: " +
-                            payment+"\n" + "Actual payment amount: " + mainPage.getBalance().getText());
+                            payment+"\n" + "Actual payment amount: " + mainPageObject.getBalance().getText().split("\n")[0]);
             e.printStackTrace();
         }
-        Thread.sleep(100);
+        //Thread.sleep(100);
     }
 
     @AfterMethod
@@ -100,10 +96,10 @@ public class PaymentTest {
                     "/test_slider/screenshots/"+testResult.getName() +
                     "_" + dateFormat.format(cal.getTime())));
         }
-        mainPage.clickOnResetButton();
-        if (!mainPage.getBalance().getText().equals("0\nруб.")){
+        mainPageObject.clickOnResetButton();
+        if (!mainPageObject.getBalance().getText().equals("0\nруб.")){
             new WebDriverWait(chromeDriver, 5).
-                    until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(),"0\nруб."));
+                    until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(),"0\nруб."));
         }
     }
 

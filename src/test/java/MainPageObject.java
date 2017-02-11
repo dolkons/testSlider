@@ -9,7 +9,7 @@ import org.testng.asserts.Assertion;
 /**
  * Created by dolkons on 10.02.17.
  */
-public class MainPage {
+public class MainPageObject {
 
     private WebDriver driver;
 
@@ -57,7 +57,7 @@ public class MainPage {
 
     private Point maxLeftSliderLocation;
 
-    public MainPage(WebDriver driver) {
+    public MainPageObject(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
         maxLeftSliderLocation = getSlider().getLocation();
@@ -160,9 +160,20 @@ public class MainPage {
         String currentBalance = this.getBalance().getText().split("\n")[0];
         doPaymentButton.click();
         WebDriverWait paymentWait = new WebDriverWait(driver, 5);
-        paymentWait.until(
-                ExpectedConditions.textToBePresentInElement(
-                        this.balance, String.valueOf(Integer.parseInt(payment) + Integer.parseInt(currentBalance))+"\nруб."));
+        try {
+            paymentWait.until(
+                    ExpectedConditions.textToBePresentInElement(
+                            this.balance, String.valueOf(Integer.parseInt(payment) + Integer.parseInt(currentBalance)) + "\nруб."));
+        }
+        catch (NumberFormatException e){
+            return;
+        }
+        catch (TimeoutException e){
+            e.printStackTrace();
+            new Assertion().fail("Old balance: " + currentBalance + "\n" +
+                    "Payment: " + payment + "\n" + "Balance should be: " + "\n" +
+                    String.valueOf(Integer.parseInt(payment) + Integer.parseInt(currentBalance)));
+        }
     }
 
     public void clickOnResetButton(){

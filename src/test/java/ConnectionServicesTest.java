@@ -25,105 +25,110 @@ import static org.testng.AssertJUnit.assertEquals;
 public class ConnectionServicesTest {
 
     private ChromeDriver chromeDriver;
-    private MainPage mainPage;
+    private MainPageObject mainPageObject;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
-        mainPage = new MainPage(chromeDriver);
+        mainPageObject = new MainPageObject(chromeDriver);
     }
 
     @Test(dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void PurchaseButtonStateTest(String payment){
-        mainPage.doPayment(payment);
+        mainPageObject.doPayment(payment);
         WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
         balanceAppearWait.
-                until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
+                until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(), payment));
 
         for (int i=300; i < 300 + (50 * new Random().nextInt(22)); i = i + 50){
-            mainPage.clickOnIncreaseButton();
+            mainPageObject.clickOnIncreaseButton();
             WebDriverWait newCostChangedWait = new WebDriverWait(chromeDriver, 10);
             newCostChangedWait.
                     until(ExpectedConditions.
                             textToBePresentInElement(
-                                    mainPage.getNewCost(), String.valueOf(i)));
+                                    mainPageObject.getNewCost(), String.valueOf(i)));
 
             if (Integer.parseInt(
-                    mainPage.getBalance().getText().split("\n")[0]) >= Integer.parseInt(mainPage.getNewCost().getText().split("\n")[0]) &&
-                    !mainPage.getCurrentCost().getText().equals(mainPage.getNewCost().getText())){
+                    mainPageObject.getBalance().getText().split("\n")[0]) >= Integer.parseInt(mainPageObject.getNewCost().getText().split("\n")[0]) &&
+                    !mainPageObject.getCurrentCost().getText().equals(mainPageObject.getNewCost().getText())){
                 assertTrue("Purchase button should be enabled!\nBalance: " +
-                        mainPage.getBalance().getText().split("\n")[0] + "\nNew cost: " +
-                        mainPage.getNewCost().getText().split("\n")[0], mainPage.getDoPurchaseButton().getAttribute("class").equals("btn"));
+                        mainPageObject.getBalance().getText().split("\n")[0] + "\nNew cost: " +
+                        mainPageObject.getNewCost().getText().split("\n")[0], mainPageObject.getDoPurchaseButton().getAttribute("class").equals("btn"));
             }
             else{
                 assertTrue("Purchase button shouldn't be enabled!\nBalance: " +
-                        mainPage.getBalance().getText().split("\n")[0] + "\nNew cost: " +
-                        mainPage.getNewCost().getText().split("\n")[0],
-                        mainPage.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
+                        mainPageObject.getBalance().getText().split("\n")[0] + "\nNew cost: " +
+                        mainPageObject.getNewCost().getText().split("\n")[0],
+                        mainPageObject.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
             }
         }
 
-        while (!mainPage.getNewCost().getText().equals("0\nруб. в месяц")) {
-            String beforeClickCost = mainPage.getNewCost().getText();
-            mainPage.clickOnDecreaseButton();
+        while (!mainPageObject.getNewCost().getText().equals("0\nруб. в месяц")) {
+            String beforeClickCost = mainPageObject.getNewCost().getText();
+            mainPageObject.clickOnDecreaseButton();
 
             WebDriverWait newCostChangedWait = new WebDriverWait(chromeDriver, 10);
             if (beforeClickCost.equals("300\nруб. в месяц")){
                 newCostChangedWait.
                         until(ExpectedConditions.
                                 textToBePresentInElement(
-                                        mainPage.getNewCost(), "0\nруб. в месяц"));
+                                        mainPageObject.getNewCost(), "0\nруб. в месяц"));
             }
             else {
                 newCostChangedWait.
                         until(ExpectedConditions.
                                 textToBePresentInElement(
-                                        mainPage.getNewCost(), String.valueOf(Integer.parseInt(beforeClickCost.split("\n")[0]) - 50)));
+                                        mainPageObject.getNewCost(), String.valueOf(Integer.parseInt(beforeClickCost.split("\n")[0]) - 50)));
             }
             if (Integer.parseInt(
-                    mainPage.getBalance().getText().split("\n")[0]) >= Integer.parseInt(mainPage.getNewCost().getText().split("\n")[0]) &&
-                    !mainPage.getCurrentCost().getText().equals(mainPage.getNewCost().getText())) {
+                    mainPageObject.getBalance().getText().split("\n")[0]) >= Integer.parseInt(mainPageObject.getNewCost().getText().split("\n")[0]) &&
+                    !mainPageObject.getCurrentCost().getText().equals(mainPageObject.getNewCost().getText())) {
                 assertTrue("Purchase button should be enabled!\nBalance: " +
-                        mainPage.getBalance().getText().split("\n")[0] + "\nNew cost: " +
-                        mainPage.getNewCost().getText().split("\n")[0],
-                        mainPage.getDoPurchaseButton().getAttribute("class").equals("btn"));
+                        mainPageObject.getBalance().getText().split("\n")[0] + "\nNew cost: " +
+                        mainPageObject.getNewCost().getText().split("\n")[0],
+                        mainPageObject.getDoPurchaseButton().getAttribute("class").equals("btn"));
             } else {
                 assertTrue("Purchase button shouldn't be enabled!\nBalance: " +
-                        mainPage.getBalance().getText().split("\n")[0] + "\nNew cost: " +
-                        mainPage.getNewCost().getText().split("\n")[0],
-                        mainPage.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
+                        mainPageObject.getBalance().getText().split("\n")[0] + "\nNew cost: " +
+                        mainPageObject.getNewCost().getText().split("\n")[0],
+                        mainPageObject.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
             }
         }
     }
 
     @Test(dataProvider = "paymentData", dataProviderClass = DataProviders.class)
     public void ServicePurchaseTest(String payment){
-        mainPage.doPayment(payment);
-        WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
-        balanceAppearWait.
-                until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(), payment));
-
         for (int i=300; i < Integer.parseInt(payment); i = i + 50){
-            mainPage.clickOnIncreaseButton();
+            mainPageObject.clickOnIncreaseButton();
             WebDriverWait newCostChangedWait = new WebDriverWait(chromeDriver, 10);
             newCostChangedWait.
                     until(ExpectedConditions.
                             textToBePresentInElement(
-                                    mainPage.getNewCost(), String.valueOf(i)));
+                                    mainPageObject.getNewCost(), String.valueOf(i)));
         }
-        String beforePurchaseBalance = mainPage.getBalance().getText();
-        mainPage.clickOnPurchaseButton();
+        assertEquals("Purchase button disabled, but current tariff's speed value is not default!",
+                mainPageObject.getCurrentSpeed().getText(), "64\nКбит/сек (макс.)");
+        assertEquals("Purchase button disabled, but current tariff's cost value is not default!",
+                mainPageObject.getCurrentCost().getText(), "0\nруб. в месяц");
+
+        mainPageObject.doPayment(payment);
+        WebDriverWait balanceAppearWait = new WebDriverWait(chromeDriver, 10);
+        balanceAppearWait.
+                until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(), payment));
+
+        String beforePurchaseBalance = mainPageObject.getBalance().getText();
+        mainPageObject.clickOnPurchaseButton();
         WebDriverWait currentCostTextAppearsWait = new WebDriverWait(chromeDriver, 10);
-        currentCostTextAppearsWait.until(ExpectedConditions.textToBePresentInElement(mainPage.getCurrentCost(), mainPage.getNewCost().getText()));
+        currentCostTextAppearsWait.until(ExpectedConditions.textToBePresentInElement(mainPageObject.getCurrentCost(), mainPageObject.getNewCost().getText()));
         assertTrue("Purchase button should not be enabled!\nCurrent cost: " +
-                mainPage.getCurrentCost().getText().split("\n")[0] + "\nNew cost: " +
-                mainPage.getNewCost().getText().split("\n")[0], mainPage.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
-        assertEquals("Current cost and new cost are not equals!", mainPage.getCurrentCost().getText(), mainPage.getNewCost().getText());
-        assertEquals("Current speed and new speed are not equals!", mainPage.getCurrentSpeed().getText(), mainPage.getNewSpeed().getText());
-        assertEquals("Balance value is not correct!", mainPage.getBalance().getText().split("\n")[0],
+                mainPageObject.getCurrentCost().getText().split("\n")[0] + "\nNew cost: " +
+                mainPageObject.getNewCost().getText().split("\n")[0], mainPageObject.getDoPurchaseButton().getAttribute("class").equals("btn disabled"));
+        assertEquals("Current cost and new cost are not equals!", mainPageObject.getCurrentCost().getText(), mainPageObject.getNewCost().getText());
+        assertEquals("Current speed and new speed are not equals!", mainPageObject.getCurrentSpeed().getText(), mainPageObject.getNewSpeed().getText());
+        assertEquals("Balance value is invalid!", mainPageObject.getBalance().getText().split("\n")[0],
                 String.valueOf(
-                        Integer.parseInt(beforePurchaseBalance.split("\n")[0]) - Integer.parseInt(mainPage.getNewCost().getText().split("\n")[0])));
+                        Integer.parseInt(beforePurchaseBalance.split("\n")[0]) - Integer.parseInt(mainPageObject.getNewCost().getText().split("\n")[0])));
     }
 
     @AfterMethod
@@ -138,10 +143,10 @@ public class ConnectionServicesTest {
                     "/test_slider/screenshots/"+testResult.getName() +
                     "_" + dateFormat.format(cal.getTime())));
         }
-        mainPage.clickOnResetButton();
-        if (!mainPage.getBalance().getText().equals("0\nруб.")){
+        mainPageObject.clickOnResetButton();
+        if (!mainPageObject.getBalance().getText().equals("0\nруб.")){
             new WebDriverWait(chromeDriver, 5).
-                    until(ExpectedConditions.textToBePresentInElement(mainPage.getBalance(),"0\nруб."));
+                    until(ExpectedConditions.textToBePresentInElement(mainPageObject.getBalance(),"0\nруб."));
         }
     }
 

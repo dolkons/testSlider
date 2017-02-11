@@ -7,7 +7,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import org.testng.asserts.Assertion;
-import org.testng.reporters.jq.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Random;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -29,28 +27,28 @@ public class ResetButtonTest {
     private ChromeDriver chromeDriver;
     private Point oldSliderLocation;
     private Point maxLeftSliderLocation;
-    private MainPage mainPage;
+    private MainPageObject mainPageObject;
 
     @BeforeClass
     public void setup() throws IOException, InterruptedException {
         Utils.runTestSliderService();
         chromeDriver = Utils.initializeChromeDriver();
-        mainPage = new MainPage(chromeDriver);
-        maxLeftSliderLocation = mainPage.getMaxLeftSliderLocation();
+        mainPageObject = new MainPageObject(chromeDriver);
+        maxLeftSliderLocation = mainPageObject.getMaxLeftSliderLocation();
     }
 
     @Test
-    public void sliderResetTest(){
-        for (int i = 1; i < 1 + new Random().nextInt(5); i++) {
+    public void SliderResetTest(){
+        for (int i = 1; i < 1 + new Random().nextInt(10); i++) {
             for (int j = 0; j < 1 + new Random().nextInt(numberOfSliderSteps); j++) {
-                oldSliderLocation = mainPage.getSlider().getLocation();
-                mainPage.clickOnIncreaseButton();
+                oldSliderLocation = mainPageObject.getSlider().getLocation();
+                mainPageObject.clickOnIncreaseButton();
                 WebDriverWait sliderPositionChangedWait = new WebDriverWait(chromeDriver, 10);
                 try {
                     sliderPositionChangedWait.until(new ExpectedCondition<Boolean>() {
                         @Override
                         public Boolean apply(WebDriver webDriver) {
-                            if (!mainPage.getSlider().getLocation().equals(oldSliderLocation)) {
+                            if (!mainPageObject.getSlider().getLocation().equals(oldSliderLocation)) {
                                 return true;
                             } else {
                                 return false;
@@ -60,17 +58,17 @@ public class ResetButtonTest {
                 } catch (TimeoutException e) {
                     new Assertion().fail(
                             "Slider position didn't change after timeout!\nOld position: " +
-                                    oldSliderLocation + "\n" + "New position: " + mainPage.getSlider().getLocation());
+                                    oldSliderLocation + "\n" + "New position: " + mainPageObject.getSlider().getLocation());
                     e.printStackTrace();
                 }
             }
-            mainPage.clickOnResetButton();
+            mainPageObject.clickOnResetButton();
             WebDriverWait sliderOnLeftWait = new WebDriverWait(chromeDriver, 10);
             try {
                 sliderOnLeftWait.until(new ExpectedCondition<Boolean>() {
                     @Override
                     public Boolean apply(WebDriver webDriver) {
-                        if (mainPage.getSlider().getLocation().equals(maxLeftSliderLocation)) {
+                        if (mainPageObject.getSlider().getLocation().equals(maxLeftSliderLocation)) {
                             return true;
                         } else {
                             return false;
@@ -81,35 +79,37 @@ public class ResetButtonTest {
             catch (TimeoutException e){
                 new Assertion().fail("Slider position didn't change to the max left after timeout!\n" +
                         "Expected position: " + maxLeftSliderLocation + "\n" +
-                        "Actual position: " + mainPage.getSlider().getLocation());
+                        "Actual position: " + mainPageObject.getSlider().getLocation());
             }
         }
     }
 
     @Test
-    public void resetConnectedServicesTest(){
-        for (int i=1; i < 1 + new Random().nextInt(5); i++) {
-            mainPage.doPayment("1400");
+    public void ResetConnectedServicesTest(){
+        for (int i=1; i < 1 + new Random().nextInt(10); i++) {
+            mainPageObject.doPayment("1400");
             for (int j = 300; j < 300 + new Random().nextInt(1100); j = j + 50) {
-                mainPage.clickOnIncreaseButton();
+                mainPageObject.clickOnIncreaseButton();
                 WebDriverWait newCostChangedWait = new WebDriverWait(chromeDriver, 10);
                 newCostChangedWait.
                         until(ExpectedConditions.
                                 textToBePresentInElement(
-                                        mainPage.getNewCost(), String.valueOf(j)));
+                                        mainPageObject.getNewCost(), String.valueOf(j)));
             }
-            mainPage.clickOnPurchaseButton();
+            mainPageObject.clickOnPurchaseButton();
             WebDriverWait currentCostTextAppearsWait = new WebDriverWait(chromeDriver, 10);
-            currentCostTextAppearsWait.until(ExpectedConditions.textToBePresentInElement(mainPage.getCurrentCost(), mainPage.getNewCost().getText()));
+            currentCostTextAppearsWait.until(ExpectedConditions.textToBePresentInElement(mainPageObject.getCurrentCost(), mainPageObject.getNewCost().getText()));
 
-            mainPage.clickOnResetButton();
+            mainPageObject.clickOnResetButton();
             try {
                 WebDriverWait currentTariffResetWait = new WebDriverWait(chromeDriver, 10);
                 currentTariffResetWait.until(new ExpectedCondition<Boolean>() {
                     @Override
                     public Boolean apply(WebDriver webDriver) {
-                        if (mainPage.getCurrentCost().getText().equals("0\nруб. в месяц") &&
-                                mainPage.getCurrentSpeed().getText().equals("64\nКбит/сек (макс.)")) {
+                        if (mainPageObject.getCurrentCost().getText().equals("0\nруб. в месяц") &&
+                                mainPageObject.getCurrentSpeed().getText().equals("64\nКбит/сек (макс.)") &&
+                                mainPageObject.getNewCost().getText().equals("0\nруб. в месяц") &&
+                                mainPageObject.getNewSpeed().getText().equals("64\nКбит/сек (макс.)")) {
                             return true;
                         } else {
                             return false;
@@ -117,26 +117,32 @@ public class ResetButtonTest {
                     }
                 });
             } catch (TimeoutException e) {
-                new Assertion().fail("Current tariff has not been reset!\n" +
-                        "Expected speed: 64\nКбит/сек (макс.)\n" +
-                        "Current speed: " + mainPage.getCurrentSpeed().getText() + "\n" +
+                new Assertion().fail("Tariff reset error!\n" +
+                        "Expected current speed: 64\nКбит/сек (макс.)\n" +
+                        "Actual current speed: " + mainPageObject.getCurrentSpeed().getText() + "\n" +
                         "Expected cost: 0\nруб. в месяц\n" +
-                        "Current cost: " + mainPage.getCurrentCost().getText());
+                        "Actual current cost: " + mainPageObject.getCurrentCost().getText() + "\n" +
+                        "Expected new speed: 64\nКбит/сек (макс.)\n" +
+                        "Actual new speed: " + mainPageObject.getNewSpeed().getText() + "\n" +
+                        "Expected new cost: 0\nруб. в месяц\n" +
+                        "Actual new cost: " + mainPageObject.getNewCost().getText());
             }
+
+
         }
     }
 
     @Test
-    public void resetBalanceTest(){
-        for (int i=0; i < 1 + new Random().nextInt(5); i++){
-            mainPage.doPayment("1400");
-            mainPage.clickOnResetButton();
+    public void ResetBalanceTest(){
+        for (int i=0; i < 1 + new Random().nextInt(10); i++){
+            mainPageObject.doPayment("1400");
+            mainPageObject.clickOnResetButton();
             try {
                 WebDriverWait balanceResetWait = new WebDriverWait(chromeDriver, 10);
                 balanceResetWait.until(new ExpectedCondition<Boolean>() {
                     @Override
                     public Boolean apply(WebDriver webDriver) {
-                        if (mainPage.getBalance().getText().equals("0\nруб.")) {
+                        if (mainPageObject.getBalance().getText().equals("0\nруб.")) {
                             return true;
                         } else {
                             return false;
@@ -146,7 +152,7 @@ public class ResetButtonTest {
             } catch (TimeoutException e) {
                 new Assertion().fail("Balance didn't reset after timeout!\n " +
                         "Expected: 0\nруб. \n" +
-                        "Actual balance: " + mainPage.getBalance().getText());
+                        "Actual balance: " + mainPageObject.getBalance().getText());
             }
         }
     }

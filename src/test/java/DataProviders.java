@@ -12,7 +12,7 @@ public class DataProviders {
 
     @DataProvider(name = "tariffsData")
     public static Object[][] tariffsData(Method m){
-        if (m.getName().equals("TestDecrease")) {
+        if (m.getName().equals("SliderTestDecrease")) {
             return new Object[][]{
                     {"Макс","1400", "Мбит/сек (макс.)"},
                     {"15.0","1350", "Мбит/сек (макс.)"},
@@ -75,14 +75,14 @@ public class DataProviders {
         switch (m.getName()){
             case "PaymentTestRandomString":{
                 Random random = new Random();
-                for (int i=0; i <= random.nextInt(10); i++){
+                for (int i=0; i <= 1 + random.nextInt(10); i++){
                     objects.add(new Object[]{Utils.createRandomString(random.nextInt(20))});
                 }
                 break;
             }
             case "PaymentTestNegativeValue":{
                 Random random = new Random();
-                for (int i=0; i <= random.nextInt(10); i++){
+                for (int i=0; i <= 1 + random.nextInt(10); i++){
                     objects.add(new Object[]{
                             String.valueOf(0-Math.abs(random.nextInt()))
                     });
@@ -91,7 +91,7 @@ public class DataProviders {
             }
             case "PurchaseButtonStateTest":{
                 Random random = new Random();
-                for (int i=0; i <= random.nextInt(10); i++){
+                for (int i=0; i <= 1 + random.nextInt(10); i++){
                     objects.add(new Object[]{
                             String.valueOf(300 + random.nextInt(1100))
                     });
@@ -100,7 +100,7 @@ public class DataProviders {
             }
             case "ServicePurchaseTest":{
                 Random random = new Random();
-                for (int i=0; i <= random.nextInt(10); i++){
+                for (int i=0; i <= 1 + random.nextInt(10); i++){
                     objects.add(new Object[]{
                             String.valueOf(300 + random.nextInt(1100))
                     });
@@ -109,7 +109,7 @@ public class DataProviders {
             }
             default:{
                 Random random = new Random();
-                for (int i=0; i <= random.nextInt(10); i++){
+                for (int i=0; i <= 1 + random.nextInt(10); i++){
                     objects.add(new Object[]{
                             (String.valueOf(Math.abs(random.nextInt(10000))))
                     });
