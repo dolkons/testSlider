@@ -49,6 +49,7 @@ public class RestartServiceTest {
     @Test
     public void RefreshPageTest(){
         chromeDriver.navigate().refresh();
+        mainPageObject.waitForPageLoaded(chromeDriver);
 
         assertEquals("Current time has not been reset!", mainPageObject.getCurrentTime().getText(), "0\nдней осталось");
         assertEquals("Current speed has not been reset!", mainPageObject.getCurrentSpeed().getText(), "64\nКбит/сек (макс.)");
@@ -73,6 +74,7 @@ public class RestartServiceTest {
         Utils.stopTestSliderService();
         Utils.runTestSliderService();
         chromeDriver.navigate().refresh();
+        mainPageObject.waitForPageLoaded(chromeDriver);
 
         assertEquals("Current time has not been reset!", mainPageObject.getCurrentTime().getText(), "0\nдней осталось");
         assertEquals("Current speed has not been reset!", mainPageObject.getCurrentSpeed().getText(), "64\nКбит/сек (макс.)");

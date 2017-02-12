@@ -6,6 +6,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.asserts.Assertion;
 
+import static org.junit.Assert.assertFalse;
+
 /**
  * Created by dolkons on 10.02.17.
  */
@@ -182,5 +184,22 @@ public class MainPageObject {
 
     public void clickOnPurchaseButton(){
         doPurchaseButton.click();
+    }
+
+    public void waitForPageLoaded(WebDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver,1);
+        try
+        {
+            wait.until(new ExpectedCondition<Boolean>() {
+                @Override
+                public Boolean apply(WebDriver driver) {
+                    return ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete");
+                }
+            });
+        }
+        catch(Throwable error)
+        {
+            assertFalse("Timeout waiting for Page Load Request to complete.",true);
+        }
     }
 }
